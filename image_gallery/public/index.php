@@ -16,10 +16,12 @@ require __DIR__ . '/../vendor/autoload.php';
 $app = new App(['settings' => $config]);
 
 $container = $app->getContainer();
+$query=require "models/DataBase.php";
 
-$pdo= require_once "models/DataBase.php";
-
+$controller = require "controllers/controllerMiddleware.php";
+$loginController = require "controllers/controllerMiddlewareForLogin.php";
 require __DIR__ . '/router/routes.php';
+
 
 ////fetching username by using id
 ////$app->get('/userid/{id}',function(Request $request,Response $response,$args) use ($pdo, $container) {
