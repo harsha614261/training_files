@@ -17,9 +17,9 @@ $app = new App(['settings' => $config]);
 
 $container = $app->getContainer();
 $query=require "models/DataBase.php";
-
-$controller = require "controllers/controllerMiddleware.php";
-$loginController = require "controllers/controllerMiddlewareForLogin.php";
+$sqlQuery =require "models/dataBaseMiddleware.php";
+require_once "controllers/User.php";
+require_once "controllers/Images.php";
 require __DIR__ . '/router/routes.php';
 
 

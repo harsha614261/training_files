@@ -1,42 +1,12 @@
 <?php
 
-class DatabaseQueries
+class userDatabaseQuery
 {
     protected $pdo;
 
     public function __construct($pdo)
     {
         $this->pdo = $pdo;
-    }
-    public function postImages($userId, $url, $cat)
-    {
-        $q = $this->pdo->prepare("insert into category (category,cat_pid) values (:cat,:userId)");
-        $q->bindParam(':cat',$cat);
-        $q->bindParam(':userId',$userId);
-        $q->execute();
-        $q1 = $this->pdo->prepare("select * from category where cat_pid=:userId and category=:cat");
-        $q1->bindParam(':cat',$cat);
-        $q1->bindParam(':userId',$userId);
-        $q1->execute();
-        $da = $q1->fetchColumn(0);
-        $q2 = $this->pdo->prepare("insert into image (image,image_pid,image_cid) values (:url,:userId,:da)");
-        $q2->bindParam(':userId',$userId);
-        $q2->bindParam(':url',$url);
-        $q2->bindParam(':da',$da);
-        $q2->execute();
-    }
-    public function fetchUserSpecificImages($userid){
-        $query = $this->pdo->prepare("select photographer.pid,photographer.photographer_name,image.image_id,image.image,image.image_cid,category.category from photographer JOIN image ON photographer.pid=image.image_pid and photographer.pid=:userid JOIN category ON image.image_cid=category.cid");
-        $query->bindParam(':userid',$userid);
-        $query->execute();
-        $res = $query->fetchAll(PDO::FETCH_ASSOC);
-        return $res;
-    }
-    public function fetchAll(){
-        $query = $this->pdo->prepare("select photographer.photographer_name,image.image,category.category from photographer JOIN image ON photographer.pid=image.image_pid JOIN category ON image.image_cid=category.cid");
-        $query->execute();
-        $res = $query->fetchAll(PDO::FETCH_ASSOC);
-        return $res;
     }
     public function modifyPhotographer($id,$name,$age,$gender){
         $partialQuery = "update photographer set";
@@ -95,20 +65,6 @@ class DatabaseQueries
         $res1 = $res->fetchAll(PDO::FETCH_ASSOC);
         return $res1;
     }
-    public function removeImage($userid,$image_id){
-        $cat = $this->pdo->prepare("select * from image where image_id=:image_id and image_pid=:userid");
-        $cat->bindParam(":image_id",$image_id);
-        $cat->bindParam(":userid",$userid);
-        $cat->execute();
-        $data = $cat->fetchColumn(3);
-        $query = $this->pdo->prepare("delete from image where image_pid=:userid and image_id=:image_id");
-        $query->bindParam(":userid",$userid);
-        $query->bindParam(":image_id",$image_id);
-        $query->execute();
-        $q = $this->pdo->prepare("delete from category where cid=:data");
-        $q->bindParam(":data",$data);
-        $q->execute();
-    }
     public function photographerRegistration($sanitizedName, $sanitizedEmail, $password, $sanitizedAge, $sanitizedGender){
         $q = $this->pdo->prepare("insert into photographer (photographer_name,email,password,age,gender) values(:sanitizedName,:sanitizedEmail,:password,:sanitizedAge,:sanitizedGender)");
         $q->bindParam(":sanitizedName",$sanitizedName);
@@ -117,7 +73,11 @@ class DatabaseQueries
         $q->bindParam(":sanitizedAge",$sanitizedAge);
         $q->bindParam(":sanitizedGender",$sanitizedGender);
         $q->execute();
-        return $sanitizedEmail;
+        $q1 = $this->pdo->prepare("select * from photographer where email=:email");
+        $q1->bindParam(":email",$sanitizedEmail);
+        $q1->execute();
+        $res = $q1->fetchColumn(0);
+        return [$sanitizedEmail,$res];
     }
     public function photographerLogin($sanitizedEmail,$password){
         $query = $this->pdo->prepare("select * from photographer where email=:sanitizedEmail and password=:password");
@@ -127,7 +87,6 @@ class DatabaseQueries
         if($query->rowCount()==1){
             return $sanitizedEmail;
         }
-
     }
 
 }
