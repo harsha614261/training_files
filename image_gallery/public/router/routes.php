@@ -14,7 +14,7 @@ $app->post("/login",function (Request $request,Response $response,$args) use ($q
 });
 
 //posting images
-$app->POST("/user/{userid}/images",function (Request $request,Response $response,$args) use ($sqlQuery) {
+$app->post("/user/{userid}/images",function (Request $request,Response $response,$args) use ($sqlQuery) {
     return Images::uploadImages($request,$response,$args['userid'],$sqlQuery);
 });
 

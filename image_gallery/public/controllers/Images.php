@@ -27,6 +27,11 @@ class Images
 
     public static function removeImages($request,$response,$image_id,$query){
         $rImage=$query->removeImage($image_id);
+        if(count($rImage)==1){
+            return $response->withJson([
+                "message"=>$rImage[0]
+            ]);
+        }
         return $response->withJson([
             "image_id"=>$image_id
         ]);

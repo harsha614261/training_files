@@ -66,18 +66,34 @@ class userDatabaseQuery
         return $res1;
     }
     public function photographerRegistration($sanitizedName, $sanitizedEmail, $password, $sanitizedAge, $sanitizedGender){
+        try {
+            $checkExist = $this->pdo->prepare("select * from photographer where email=:email");
+        }
+        catch(exception $e){
+            return ["500"];
+        }
+        $checkExist->bindParam(":email", $sanitizedEmail);
+        $checkExist->execute();
+        if($checkExist->rowCount()==1){
+            return ["Email Already Exists"];
+        }
         $q = $this->pdo->prepare("insert into photographer (photographer_name,email,password,age,gender) values(:sanitizedName,:sanitizedEmail,:password,:sanitizedAge,:sanitizedGender)");
-        $q->bindParam(":sanitizedName",$sanitizedName);
-        $q->bindParam(":sanitizedEmail",$sanitizedEmail);
-        $q->bindParam(":password",$password);
-        $q->bindParam(":sanitizedAge",$sanitizedAge);
-        $q->bindParam(":sanitizedGender",$sanitizedGender);
+        $q->bindParam(":sanitizedName", $sanitizedName);
+        $q->bindParam(":sanitizedEmail", $sanitizedEmail);
+        $q->bindParam(":password", $password);
+        $q->bindParam(":sanitizedAge", $sanitizedAge);
+        $q->bindParam(":sanitizedGender", $sanitizedGender);
         $q->execute();
-        $q1 = $this->pdo->prepare("select * from photographer where email=:email");
-        $q1->bindParam(":email",$sanitizedEmail);
+        try {
+            $q1 = $this->pdo->prepare("select * from photographer where email=:email");
+        }
+        catch (exception $e){
+            return ['500'];
+        }
+        $q1->bindParam(":email", $sanitizedEmail);
         $q1->execute();
         $res = $q1->fetchColumn(0);
-        return [$sanitizedEmail,$res];
+        return [$sanitizedEmail, $res];
     }
     public function photographerLogin($sanitizedEmail,$password){
         $query = $this->pdo->prepare("select * from photographer where email=:sanitizedEmail and password=:password");
