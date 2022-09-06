@@ -17,12 +17,20 @@ class User
         $sanitizedGender = filter_var($gender,
             FILTER_UNSAFE_RAW);
         $insert=$query->photographerRegistration($photographer_name,$email,sha1($password),$age,$gender);
-        return $response->withJson([
-            "pid"=>$insert[1],
-            "photographer_name"=>$photographer_name,
-            "email"=>$insert[0]
+        if(count($insert)==1) {
+            return $response->withJSon([
+                "Message"=>$insert[0]
+            ]);
+        }
+        else{
+            return $response->withJson([
+                "pid"=>$insert[1],
+                "photographer_name"=>$photographer_name,
+                "email"=>$insert[0]
 
-        ]);
+            ]);
+        }
+
 
     }
     public static function userLogin($request,$response,$args,$query){

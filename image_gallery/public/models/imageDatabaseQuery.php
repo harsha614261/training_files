@@ -46,6 +46,9 @@ class imageDatabaseQuery
         $cat = $this->pdo->prepare("select * from image where image_id=:image_id");
         $cat->bindParam(":image_id",$image_id);
         $cat->execute();
+        if($cat->rowCount()==0){
+            return ["invalid image"];
+        }
         $data = $cat->fetchColumn(3);
         $query = $this->pdo->prepare("delete from image where image_id=:image_id");
         $query->bindParam(":image_id",$image_id);
@@ -53,5 +56,6 @@ class imageDatabaseQuery
         $q = $this->pdo->prepare("delete from category where cid=:data");
         $q->bindParam(":data",$data);
         $q->execute();
+        return ["valid image","$image_id"];
     }
 }
