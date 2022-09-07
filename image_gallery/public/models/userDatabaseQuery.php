@@ -12,6 +12,18 @@ class userDatabaseQuery
         $partialQuery = "update photographer set";
         $j=0;
         $k=0;
+        $gend=-1;
+        if(!empty($gender)){
+            if(strtolower($gender)=="male"){
+                $gend = 1;
+            }
+            elseif(strtolower($gender)=="female"){
+                $gend = 0;
+            }
+            elseif (strtolower($gender)=="other"){
+                $gend = 2;
+            }
+        }
         if(!empty($name)){
             $partialQuery .=" photographer_name=:name";
             $j=1;
@@ -43,18 +55,18 @@ class userDatabaseQuery
             if(!empty($age)){
                 $check->bindParam(':age',$age);
                 if(!empty($gender)){
-                    $check->bindParam(':gender',$gender);
+                    $check->bindParam(':gender',$gend);
                 }
             }
         }
         elseif (!empty($age)){
             $check->bindParam(':age',$age);
             if(!empty($gender)){
-                $check->bindParam(':gender',$gender);
+                $check->bindParam(':gender',$gend);
             }
         }
         elseif (!empty($gender)){
-            $check->bindParam(':gender',$gender);
+            $check->bindParam(':gender',$gend);
         }
 
         $check->bindParam(':id',$id);
@@ -66,43 +78,46 @@ class userDatabaseQuery
         return $res1;
     }
     public function photographerRegistration($sanitizedName, $sanitizedEmail, $password, $sanitizedAge, $sanitizedGender){
-        try {
-            $checkExist = $this->pdo->prepare("select * from photographer where email=:email");
-        }
-        catch(exception $e){
-            return ["500"];
-        }
+        $checkExist = $this->pdo->prepare("select * from photographer where email=:email");
         $checkExist->bindParam(":email", $sanitizedEmail);
         $checkExist->execute();
         if($checkExist->rowCount()==1){
             return ["Email Already Exists"];
         }
-        $q = $this->pdo->prepare("insert into photographer (photographer_name,email,password,age,gender) values(:sanitizedName,:sanitizedEmail,:password,:sanitizedAge,:sanitizedGender)");
+        $genderVar=-1;
+        if(strtolower($sanitizedGender)=="male"){
+            $genderVar=1;
+        }
+        elseif(strtolower($sanitizedGender)=="female"){
+            $genderVar=0;
+        }
+        elseif (strtolower($sanitizedGender)=="other"){
+            $genderVar=2;
+        }
+
+        $q = $this->pdo->prepare("insert into photographer (photographer_name,email,password,age,gender) values(:sanitizedName,:sanitizedEmail,:password,:sanitizedAge,:genderVar)");
         $q->bindParam(":sanitizedName", $sanitizedName);
         $q->bindParam(":sanitizedEmail", $sanitizedEmail);
         $q->bindParam(":password", $password);
         $q->bindParam(":sanitizedAge", $sanitizedAge);
-        $q->bindParam(":sanitizedGender", $sanitizedGender);
+        $q->bindParam(":genderVar", $genderVar);
         $q->execute();
-        try {
-            $q1 = $this->pdo->prepare("select * from photographer where email=:email");
-        }
-        catch (exception $e){
-            return ['500'];
-        }
+        $q1 = $this->pdo->prepare("select * from photographer where email=:email");
         $q1->bindParam(":email", $sanitizedEmail);
         $q1->execute();
         $res = $q1->fetchColumn(0);
         return [$sanitizedEmail, $res];
     }
-    public function photographerLogin($sanitizedEmail,$password){
+    public function photographerLogin($sanitizedEmail,$password)
+    {
         $query = $this->pdo->prepare("select * from photographer where email=:sanitizedEmail and password=:password");
-        $query->bindParam(":sanitizedEmail",$sanitizedEmail);
-        $query->bindParam(":password",$password);
+        $query->bindParam(":sanitizedEmail", $sanitizedEmail);
+        $query->bindParam(":password", $password);
         $query->execute();
-        if($query->rowCount()==1){
+        if ($query->rowCount() == 1) {
             return $sanitizedEmail;
         }
+
     }
 
 }
