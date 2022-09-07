@@ -110,14 +110,18 @@ class userDatabaseQuery
     }
     public function photographerLogin($sanitizedEmail,$password)
     {
-        $query = $this->pdo->prepare("select * from photographer where email=:sanitizedEmail and password=:password");
-        $query->bindParam(":sanitizedEmail", $sanitizedEmail);
-        $query->bindParam(":password", $password);
-        $query->execute();
-        if ($query->rowCount() == 1) {
-            return $sanitizedEmail;
-        }
-
+            try {
+                $query = $this->pdo->prepare("select * from photographer where email=:sanitizedEmail and password=:password");
+                $query->bindParam(":sanitizedEmail", $sanitizedEmail);
+                $query->bindParam(":password", $password);
+                $query->execute();
+                if ($query->rowCount() == 1) {
+                    return [$sanitizedEmail];
+                }
+            }
+            catch(PDOException $e){
+                return [$e->getCode(),1];
+            }
     }
 
 }

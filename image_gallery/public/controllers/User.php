@@ -34,19 +34,26 @@ class User
 
     }
     public static function userLogin($request,$response,$args,$query){
-        $email=$request->getParam('email');
-        $password=$request->getParam('password');
+
+        $email = $request->getParam('email');
+        $password = $request->getParam('password');
         $sanitizedEmail = filter_var($email,
             FILTER_SANITIZE_EMAIL);
-        $validate=$query->photographerLogin($sanitizedEmail,sha1($password));
-        if(empty($validate)){
+        $validate = $query->photographerLogin($sanitizedEmail, sha1($password));
+
+        if (empty($validate)) {
             return $response->withJson([
-                "message"=>"invalid user or photographer"
+                "message" => "invalid user or photographer"
             ]);
         }
+        if(count($validate)==2){
+            return $response
+                ->withStatus(500);
+        }
         return $response->withJson([
-            "email"=>$validate
+            "email" => $validate[0]
         ]);
+
     }
 
     public static function updateUser($request,$response,$userid,$query){
