@@ -18,8 +18,8 @@ class User
             FILTER_UNSAFE_RAW);
         $insert=$query->photographerRegistration($photographer_name,$email,sha1($password),$age,$gender);
         if(count($insert)==1) {
-            return $response->withJSon([
-                "Message"=>$insert[0]
+            return $response->withJson([
+                "message"=>$insert[0]
             ]);
         }
         else{
